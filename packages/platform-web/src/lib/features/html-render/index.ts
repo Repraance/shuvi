@@ -58,6 +58,7 @@ const core = createPlugin({
       : createFile({
           name: 'routes.js',
           content: () => {
+            console.time('routes.js')
             const rawRoutes = getRoutesFromFiles(
               getAllFiles(paths.pagesDir),
               paths.pagesDir
@@ -67,7 +68,18 @@ const core = createPlugin({
               paths.pagesDir
             );
             const finalRoutes = getFinalRoutes(normalizedRoutes);
+            finalRoutes.forEach((route) => {
+              const { component, fullPath } = route;
+              if (component && fullPath) {
+                ifComponentHasLoader(component);
+                ifComponentHasLoader(component);
+                ifComponentHasLoader(component);
+                ifComponentHasLoader(component);
+                ifComponentHasLoader(component);
+              }
+            })
             setRoutes(finalRoutes);
+            console.timeEnd('routes.js')
             return getRoutesContent(finalRoutes, paths.pagesDir);
           },
           dependencies: paths.pagesDir
