@@ -275,7 +275,7 @@ export function baseWebpackChain({
     // For webpack-dev-middleware usage
     config.watchOptions({
       aggregateTimeout: 10,
-      ignored: ['**/.git/**', '**/node_modules/**']
+      ignored: ['**/.git/**', '**/node_modules/**', '**/components/a.js']
     });
     config.set('infrastructureLogging', {
       level: 'none'

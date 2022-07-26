@@ -83,6 +83,10 @@ const plugin = createPlugin({
           extraRoutes.concat(routes),
           paths.routesDir
         );
+        function sleep(timeout: number) {
+          return new Promise(resolve => setTimeout(resolve, timeout));
+        }
+        await sleep(5000);
         setRoutes(normalizedRoutes);
         return generatePageRoutesContent(normalizedRoutes);
       },
