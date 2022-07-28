@@ -24,6 +24,10 @@ export default class FixWatchingPlugin implements Plugin {
       return watching;
     };
 
+    compiler.hooks.watchRun.tap(PLUGIN_NAME, compiler => {
+      console.log('========' + compiler.name + 'watchRun');
+    });
+
     compiler.hooks.done.tap(PLUGIN_NAME, stats => {
       if (watching && !restored) {
         stats.compilation.startTime -= TIME_FIX;
