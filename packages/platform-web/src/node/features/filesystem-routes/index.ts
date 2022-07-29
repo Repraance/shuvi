@@ -36,6 +36,10 @@ export {
   getApiMiddleware
 };
 
+function sleep(timeout: number) {
+  return new Promise(resolve => setTimeout(resolve, timeout));
+}
+
 const plugin = createPlugin({
   setup: ({ addHooks }) => {
     addHooks({ addRoutes, addMiddlewareRoutes });
@@ -82,6 +86,7 @@ const plugin = createPlugin({
           extraRoutes.concat(routes),
           paths.routesDir
         );
+        await sleep(1000);
         setRoutes(normalizedRoutes);
         return generatePageRoutesContent(normalizedRoutes);
       },

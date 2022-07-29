@@ -14,6 +14,7 @@ import generateResource from './generateResource';
 import { resolvePkgFile } from '../../paths';
 import { buildHtml } from './buildHtml';
 import { getMiddlewares } from '../middlewares';
+import WebpackWatchWaitForFileBuilderPlugin from './webpack-watch-wait-for-file-builder-plugin';
 
 function getServerEntry(): IWebpackEntry {
   return {
@@ -40,7 +41,7 @@ export const getPlugin = (
         chain: serverChain
       };
     },
-    configWebpack: chain => {
+    configWebpack: (chain, { mode }, context) => {
       chain.merge({
         entry: {
           [BUILD_CLIENT_RUNTIME_POLYFILL]: ['@shuvi/app/core/polyfill'],
@@ -49,6 +50,17 @@ export const getPlugin = (
           ]
         }
       });
+      if (mode === 'development') {
+        chain
+          .plugin('webpack-watch-wait-for-file-builder-plugin')
+          .use(WebpackWatchWaitForFileBuilderPlugin, [
+            {
+              onBuildStart: context.onBuildStart,
+              onBuildEnd: context.onBuildEnd
+            }
+          ]);
+      }
+
       return chain;
     },
     addRuntimeService: () => [
