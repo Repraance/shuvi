@@ -5,6 +5,7 @@ import { Compiler, Plugin } from '@shuvi/toolpack/lib/webpack';
 type Options = {
   onBuildStart: IPluginContext['onBuildStart'];
   onBuildEnd: IPluginContext['onBuildEnd'];
+  onBuildTriggered: IPluginContext['onBuildTriggered'];
 };
 
 export default class WebpackWatchWaitForFileBuilderPlugin implements Plugin {
@@ -24,6 +25,10 @@ export default class WebpackWatchWaitForFileBuilderPlugin implements Plugin {
      *
      * In this way, during build of fileBuilder, webpack will not trigger any watchRun event but keep watching changed files.
      */
+
+    compiler.hooks.watchRun.tap('sdsdsds', () => {
+      console.log('watchRun');
+    });
     onBuildStart(() => {
       compiler.watching.suspend();
     });

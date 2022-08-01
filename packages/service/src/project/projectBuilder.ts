@@ -155,6 +155,10 @@ class ProjectBuilder {
   get onBuildEnd() {
     return this._fileBuilder.onBuildEnd;
   }
+
+  get onBuildTriggered() {
+    return this._fileBuilder.onBuildTriggered;
+  }
 }
 
 export { ProjectBuilder };

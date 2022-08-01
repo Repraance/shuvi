@@ -15,7 +15,7 @@ module.exports = createPlugin({
         const result = fs.existsSync(sample)
           ? `export { default } from '${sample}'`
           : `export default 'not exist'`;
-        await sleep(2000);
+        await sleep(1000);
         return result;
       },
       dependencies: [sample]

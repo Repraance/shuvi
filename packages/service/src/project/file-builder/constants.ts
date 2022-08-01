@@ -1,1 +1,1 @@
-export const WATCH_AGGREGATE_TIMEOUT = 50;
+export const WATCH_AGGREGATE_TIMEOUT = 5;

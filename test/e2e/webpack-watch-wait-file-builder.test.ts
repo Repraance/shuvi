@@ -67,7 +67,7 @@ describe('webpack watching should wait for fileBuilder', () => {
     });
   });
 
-  describe('changing files should not work without WebpackWatchWaitForFileBuilderPlugin', () => {
+  describe.skip('changing files should not work without WebpackWatchWaitForFileBuilderPlugin', () => {
     test(`webpack watching should not wait for fileBuilder's buildEnd and should throw error when changing files`, async () => {
       try {
         ctx = await launchFixture('webpack-watch-wait-file-builder', {

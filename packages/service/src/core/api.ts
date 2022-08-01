@@ -132,7 +132,8 @@ class Api {
       resolveBuildFile: this.resolveBuildFile.bind(this),
       resolvePublicFile: this.resolvePublicFile.bind(this),
       onBuildStart: this._projectBuilder.onBuildStart,
-      onBuildEnd: this._projectBuilder.onBuildEnd
+      onBuildEnd: this._projectBuilder.onBuildEnd,
+      onBuildTriggered: this._projectBuilder.onBuildTriggered
     };
 
     const { runner, setContext, createPlugin, usePlugin } = this._pluginManager;
@@ -144,7 +145,7 @@ class Api {
       await this._initPlatform();
 
     // 2. init user plugins
-    const userPlugins = await getPlugins(this._cwd, {
+    const userPlugins = getPlugins(this._cwd, {
       presets: this._presets,
       plugins: this._plugins
     });

@@ -36,6 +36,7 @@ export interface FileBuilder<C extends {}> {
   getContent: <T>(fileOption: FileOption<T>) => T;
   onBuildStart: (eventHandler: OnBuildStartHandler) => EventCanceler;
   onBuildEnd: (eventHandler: OnBuildEndHandler) => EventCanceler;
+  onBuildTriggered: (eventHandler: () => void) => EventCanceler;
 }
 
 export const getFileBuilder = <C extends {} = {}>(
@@ -52,6 +53,7 @@ export const getFileBuilder = <C extends {} = {}>(
 
   const onBuildStartHandlers = new Set<OnBuildStartHandler>();
   const onBuildEndHandlers = new Set<OnBuildEndHandler>();
+  const onBuildTriggeredHandlers = new Set<() => void>();
 
   const addFile = (...newFileOption: FileOption<any, C>[]) => {
     fileOptions.push(...newFileOption.map(option => ({ ...option })));
@@ -307,6 +309,9 @@ export const getFileBuilder = <C extends {} = {}>(
     for (const [id, watchOptions] of watchMap.entries()) {
       const canceler = createWatcher(watchOptions, () => {
         // currently handler has no params
+        // console.log('raw watch handler', id)
+        Array.from(onBuildTriggeredHandlers).forEach(handler => handler());
+
         watcherHandler(id);
       });
       watcherCancelers.push(canceler);
@@ -377,6 +382,13 @@ export const getFileBuilder = <C extends {} = {}>(
       onBuildEndHandlers.delete(eventHandler);
     };
   };
+
+  const onBuildTriggered = (eventHandler: () => void) => {
+    onBuildTriggeredHandlers.add(eventHandler);
+    return () => {
+      onBuildTriggeredHandlers.delete(eventHandler);
+    };
+  };
   return {
     addFile,
     build,
@@ -384,6 +396,7 @@ export const getFileBuilder = <C extends {} = {}>(
     close,
     getContent,
     onBuildStart,
-    onBuildEnd
+    onBuildEnd,
+    onBuildTriggered
   };
 };

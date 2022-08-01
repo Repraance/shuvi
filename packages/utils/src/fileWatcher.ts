@@ -19,7 +19,7 @@ export type WatchCallback = (event: WatchEvent) => void;
 
 const options = {
   // options:
-  aggregateTimeout: 10,
+  aggregateTimeout: 0,
   // fire "aggregated" event when after a change for 1000ms no additional change occurred
   // aggregated defaults to undefined, which doesn't fire an "aggregated" event
 

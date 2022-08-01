@@ -56,7 +56,8 @@ export const getPlugin = (
           .use(WebpackWatchWaitForFileBuilderPlugin, [
             {
               onBuildStart: context.onBuildStart,
-              onBuildEnd: context.onBuildEnd
+              onBuildEnd: context.onBuildEnd,
+              onBuildTriggered: context.onBuildTriggered
             }
           ]);
       }

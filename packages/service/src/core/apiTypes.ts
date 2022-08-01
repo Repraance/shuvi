@@ -153,4 +153,5 @@ export interface IPluginContext {
   getAssetPublicUrl(...paths: string[]): string;
   onBuildStart: FileBuilder<any>['onBuildStart'];
   onBuildEnd: FileBuilder<any>['onBuildEnd'];
+  onBuildTriggered: FileBuilder<any>['onBuildTriggered'];
 }
