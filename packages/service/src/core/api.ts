@@ -31,6 +31,7 @@ import { getPaths } from './paths';
 import { getPlugins, resolvePlugin } from './getPlugins';
 import { ServerPluginInstance } from '../server';
 import { _setResourceEnv } from '../resources';
+import WebpackWatchWaitForFileBuilderPlugin from '../lib/webpack-watch-wait-for-file-builder-plugin';
 
 const ServiceModes: IServiceMode[] = ['development', 'production'];
 
@@ -138,9 +139,7 @@ class Api {
       resolveAppFile: this.resolveAppFile.bind(this),
       resolveUserFile: this.resolveUserFile.bind(this),
       resolveBuildFile: this.resolveBuildFile.bind(this),
-      resolvePublicFile: this.resolvePublicFile.bind(this),
-      onBuildStart: this._projectBuilder.onBuildStart,
-      onBuildEnd: this._projectBuilder.onBuildEnd
+      resolvePublicFile: this.resolvePublicFile.bind(this)
     };
 
     const { runner, setContext, createPlugin, usePlugin } = this._pluginManager;
@@ -152,7 +151,7 @@ class Api {
       await this._initPlatform();
 
     // 2. init user plugins
-    const userPlugins = await getPlugins(this._cwd, {
+    const userPlugins = getPlugins(this._cwd, {
       presets: this._presets,
       plugins: this._plugins
     });
@@ -170,7 +169,26 @@ class Api {
         return config;
       }
     });
-    usePlugin(addIncludeToSwcLoader);
+
+    const webpackWaitPlugin = createPlugin({
+      configWebpack: config => {
+        if (this.mode === 'development') {
+          config
+            .plugin('webpack-watch-wait-for-file-builder-plugin')
+            .use(WebpackWatchWaitForFileBuilderPlugin, [
+              {
+                onBuildStart: this._projectBuilder.onBuildStart,
+                onBuildEnd: this._projectBuilder.onBuildEnd,
+                onBuildTriggered: this._projectBuilder.onBuildTriggered,
+                invalidate: this._projectBuilder.invalidate
+              }
+            ]);
+        }
+
+        return config;
+      }
+    });
+    usePlugin(addIncludeToSwcLoader, webpackWaitPlugin);
 
     // 3. init resources
     const resources = (await runner.addResource()).flat() as Resources[];

@@ -4,7 +4,8 @@ import {
   launchFixture,
   resolveFixture,
   check,
-  getIframeTextContent
+  getIframeTextContent,
+  wait
 } from '../utils';
 import { readFileSync, writeFileSync, renameSync, existsSync } from 'fs';
 
@@ -16,7 +17,7 @@ function resolveRoutePath(routeName: string) {
   return resolveFixture('basic/src/routes/hmr/' + routeName);
 }
 
-jest.setTimeout(5 * 60 * 1000);
+jest.setTimeout(30 * 60 * 1000);
 
 describe('Hot Module Reloading', () => {
   let ctx: AppCtx;
@@ -35,27 +36,50 @@ describe('Hot Module Reloading', () => {
 
     try {
       page = await ctx.browser.page(ctx.url('/hmr/one'));
+      const errorSpy = jest.spyOn(console, 'error');
 
-      expect(await page.$text('[data-test-id="hmr-one"]')).toBe(
-        'This is the one page'
-      );
+      const loopFn = async (time: number) => {
+        console.log('------------ current time loop start', time);
+        expect(errorSpy).toBeCalledTimes(0);
+        expect(await page.$text('[data-test-id="hmr-one"]')).toBe(
+          'This is the one page'
+        );
+        console.log(
+          '------------ current time, will change to new-route',
+          time
+        );
+        expect(errorSpy).toBeCalledTimes(0);
+        // Rename the file to mimic a deleted page
+        renameSync(routePath, newRoutePath);
+        console.log(
+          '------------ current time , has changed to new-route',
+          time
+        );
+        expect(errorSpy).toBeCalledTimes(0);
+        await check(
+          () => page.$text('#__APP'),
+          t => /This page could not be found/.test(t)
+        );
+        console.log('------------ current time,  will change to route', time);
+        expect(errorSpy).toBeCalledTimes(0);
+        // Rename the file back to the original filename
+        renameSync(newRoutePath, routePath);
+        console.log('------------ current time, has changed to route', time);
+        expect(errorSpy).toBeCalledTimes(0);
+        // wait until the page comes back
+        await check(
+          () => page.$text('[data-test-id="hmr-one"]'),
+          t => /This is the one page/.test(t)
+        );
+        console.log('------------ current time loop end', time);
+        expect(errorSpy).toBeCalledTimes(0);
+      };
 
-      // Rename the file to mimic a deleted page
-      renameSync(routePath, newRoutePath);
+      const times = 500;
 
-      await check(
-        () => page.$text('#__APP'),
-        t => /This page could not be found/.test(t)
-      );
-
-      // Rename the file back to the original filename
-      renameSync(newRoutePath, routePath);
-
-      // wait until the page comes back
-      await check(
-        () => page.$text('[data-test-id="hmr-one"]'),
-        t => /This is the one page/.test(t)
-      );
+      for (let i = 0; i < times; i++) {
+        await loopFn(i + 1);
+      }
     } finally {
       await page.close();
 
@@ -65,7 +89,7 @@ describe('Hot Module Reloading', () => {
     }
   });
 
-  describe('editing a page', () => {
+  describe.skip('editing a page', () => {
     test('should detect the changes and display it', async () => {
       const pagePath = resolvePagePath('two');
 

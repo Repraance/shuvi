@@ -22,18 +22,12 @@ export type FileOptionWithoutId<T = string, C = any> = Omit<
 
 export interface FileInternalInstance<T = string, C = any> {
   name?: string;
+  fullPath?: string;
   id: FileId;
   virtual?: boolean;
   content: ContentFunction<T, C>;
   fileContent?: T;
 }
-
-/* export interface DefineFile {
-  <T = string, C = any>(fileOption: FileOptionWithoutId<T, C>): FileOption<
-    T,
-    C
-  >;
-} */
 
 export type DefineFile = <T = string, C = any>(
   fileOption: FileOptionWithoutId<T, C>
@@ -49,6 +43,7 @@ export type BuildInfo = {
   files: Set<FileId>;
   fronts: Set<string>;
   rears: Set<string>;
+  fromInvalidate: boolean;
 };
 
 export type FileStatus = {
