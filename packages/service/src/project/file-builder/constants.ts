@@ -1,1 +1,3 @@
 export const WATCH_AGGREGATE_TIMEOUT = 5;
+
+export const COMPLETED_BUILDS_REMAIN_TIMEOUT = 200;

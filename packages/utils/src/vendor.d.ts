@@ -1,9 +1,9 @@
-declare module "watchpack" {
-  import { EventEmitter } from "events";
+declare module 'watchpack' {
+  import { EventEmitter } from 'events';
 
   export interface TimeInfo {
-    safeTime: number;
-    timestamp: number;
+    safeTime?: number;
+    timestamp?: number;
     accuracy?: number;
   }
 
@@ -23,7 +23,12 @@ declare module "watchpack" {
     pause(): void;
     close(): void;
 
+    getAggregated(): { changes: Set<string>; removals: Set<string> };
     getTimeInfoEntries(): Map<string, TimeInfo>;
+    collectTimeInfoEntries(
+      fileInfoEntries: Map<string, TimeInfo>,
+      directoryInfoEntries: Map<string, TimeInfo>
+    ): void;
   }
 
   export default Watchpack;

@@ -1731,4 +1731,69 @@ describe('fileBuilder watch', () => {
       });
     });
   });
+
+  describe('watch with dependencies and invalidate', () => {
+    test('invalid without params should trigger a full new build', done => {
+      const fileBuilder = getFileBuilder();
+
+      const {
+        addFile,
+        getContent,
+        watch,
+        onBuildStart,
+        onBuildEnd,
+        close,
+        invalidate
+      } = fileBuilder;
+      writeFileSync(src, 'a');
+
+      const contentA = jest.fn(() => {
+        return readFileSync(src);
+      });
+
+      const contentB = jest.fn(() => {
+        return getContent(A) + 'b';
+      });
+      const A = defineFile({
+        name: 'a',
+        content: contentA,
+        dependencies: [src]
+      });
+
+      const B = defineFile({
+        name: 'b',
+        content: contentB,
+        dependencies: [A]
+      });
+      addFile(A, B);
+      watch(rootDir).then(() => {
+        let targets: Set<string>;
+        const onBuildStartHandler = jest.fn(() => {
+          matchFile([
+            [a, 'a'],
+            [b, 'ab']
+          ]);
+          expect(Array.from(targets)).toEqual([a, b]);
+          expect(contentA).toBeCalledTimes(1);
+          expect(contentB).toBeCalledTimes(1);
+        });
+
+        onBuildStart(onBuildStartHandler);
+
+        onBuildEnd(() => {
+          expect(onBuildStartHandler).toBeCalledTimes(1);
+          matchFile([
+            [a, 'a'],
+            [b, 'ab']
+          ]);
+          expect(contentA).toBeCalledTimes(2);
+          expect(contentB).toBeCalledTimes(1); // skipped because content no change
+          close().then(done);
+        });
+        targets = invalidate();
+      });
+    });
+    test('invalid with changed sources params should trigger a new build containing changed sources', () => {});
+    test('if a new buildOnce has the same file list with one current build and those files do not change, this new buildOnce should be discarded', () => {});
+  });
 });

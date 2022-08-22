@@ -37,7 +37,8 @@ export async function check<T>(
       lastErr = err;
     }
   }
-
+  // @ts-ignore
+  console.log('last content', content);
   throw new Error('CHECK TIMED OUT: ' + lastErr);
 }
 

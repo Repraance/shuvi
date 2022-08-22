@@ -26,7 +26,7 @@ describe('fileWatcher', () => {
     test('change a file', done => {
       const fileTarget = resolveFixture('watchers/watcher/watcher.js');
 
-      let close = watch(
+      let { close } = watch(
         {
           files: [fileTarget]
         },
@@ -46,7 +46,7 @@ describe('fileWatcher', () => {
     test('add a file', done => {
       const fileTarget = resolveFixture('watchers/watcher-add/add.js');
 
-      let close = watch(
+      let { close } = watch(
         {
           files: [fileTarget]
         },
@@ -65,7 +65,7 @@ describe('fileWatcher', () => {
     test('delete a file', done => {
       const fileTarget = resolveFixture('watchers/watcher-delete/delete.js');
 
-      let close = watch(
+      let { close } = watch(
         {
           files: [fileTarget]
         },
@@ -92,7 +92,7 @@ describe('fileWatcher', () => {
       );
 
       const mock = jest.fn();
-      let close = watch(
+      let { close } = watch(
         {
           files: [fileToWatch]
         },
@@ -111,7 +111,7 @@ describe('fileWatcher', () => {
       const directoryTarget = resolveFixture('watchers/watcher-directory');
       const fileTarget = resolveFixture('watchers/watcher-directory/file1.js');
 
-      let close = watch(
+      let { close } = watch(
         {
           directories: [directoryTarget]
         },
@@ -134,7 +134,7 @@ describe('fileWatcher', () => {
         'watchers/watcher-directory-add/add.js'
       );
 
-      let close = watch(
+      let { close } = watch(
         {
           directories: [directoryTarget]
         },
@@ -162,7 +162,7 @@ describe('fileWatcher', () => {
         'watchers/watcher-directory-remove/fileToRemove.js'
       );
 
-      let close = watch(
+      let { close } = watch(
         {
           directories: [directoryTarget]
         },
