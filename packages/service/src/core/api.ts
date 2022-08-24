@@ -177,7 +177,7 @@ class Api {
               {
                 onBuildStart: this._projectBuilder.onBuildStart,
                 onBuildEnd: this._projectBuilder.onBuildEnd,
-                onBuildTriggered: this._projectBuilder.onBuildTriggered,
+                onInvalid: this._projectBuilder.onInvalid,
                 findFilesByDependencies:
                   this._projectBuilder.findFilesByDependencies
               }

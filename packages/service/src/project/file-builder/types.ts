@@ -42,22 +42,41 @@ export type DependencyInfo = {
  * Infos for a buildOnce
  */
 export type BuildInfo = {
+  /**
+   * uuid of this buildOnce
+   */
   id: string;
   /**
    * All files included in this build. Will never change
    */
   files: ReadonlySet<FileId>;
   /**
-   * Files waiting to be built in this build. Will change until be cleared.
+   * The set of ids of the buildOnces which are in front of this buildOnce
    */
-  pendingFiles: Set<FileId>;
   fronts: Set<string>;
+  /**
+   * The set of ids of the buildOnces which are in rear of this buildOnce
+   */
   rears: Set<string>;
+  /**
+   * changed files that includes all the changed files of all the fronts.
+   */
+  collectedChangedFiles: Set<FileId>;
 };
 
 export type FileStatus = {
+  /** whether this file has been built*/
   updated: boolean;
-  noChange?: boolean;
+  /** whether this file has changed after build */
+  changed: boolean;
+};
+
+export type BuildRunningInfo = {
+  filesStatusMap: Map<FileId, FileStatus>;
+  /**
+   * Files waiting to be built in this build. Will change until be cleared.
+   */
+  pendingFiles: Set<FileId>;
 };
 
 export type FilesInfo = {

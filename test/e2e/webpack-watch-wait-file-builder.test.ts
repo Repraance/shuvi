@@ -110,7 +110,7 @@ describe('webpack watch wait file builder', () => {
           expect(errorSpy).not.toHaveBeenCalled();
         };
 
-        const times = 2;
+        const times = 10;
 
         for (let i = 0; i < times; i++) {
           await loopFn(i + 1);
@@ -125,7 +125,7 @@ describe('webpack watch wait file builder', () => {
       }
     });
 
-    test('webpack watching should not throw error when changing files frequently', async () => {
+    test.skip('webpack watching should not throw error when changing files frequently', async () => {
       try {
         ctx = await launchFixture('webpack-watch-wait-file-builder', {
           plugins: ['./plugin/fileBuilder']
@@ -133,42 +133,65 @@ describe('webpack watch wait file builder', () => {
         page = await ctx.browser.page(ctx.url('/one'));
         expect(await page.$text('#__APP')).toBe('Index Page sample1');
         const errorSpy = jest.spyOn(console, 'error');
+        const changeInterval = 200;
         const loopFn = async (time: number) => {
           console.log('------------ current time ------------', time);
           // change sample file path and change back
           renameSync(sampleFilePath, newSampleFilePath);
+          console.log('changed samplefile', Date.now());
+          await wait(changeInterval);
 
           expect(errorSpy).not.toHaveBeenCalled();
           renameSync(newSampleFilePath, sampleFilePath);
-          await wait(200);
+          console.log('changed samplefile back', Date.now());
+
+          await wait(changeInterval);
+
           expect(errorSpy).not.toHaveBeenCalled();
 
           // change one page file path and change back
           renameSync(onePageFilePath, newOnePageFilePath);
-          await wait(200);
+          console.log('changed onePageFile', Date.now());
+
+          await wait(changeInterval);
+
           expect(errorSpy).not.toHaveBeenCalled();
           renameSync(newOnePageFilePath, onePageFilePath);
-          await wait(200);
+          console.log('changed onePageFile back', Date.now());
+
+          await wait(changeInterval);
+
           expect(errorSpy).not.toHaveBeenCalled();
 
           // change one dir path and change back
           renameSync(oneDirPath, newOneDirPath);
-          await wait(200);
+          console.log('changed oneDir', Date.now());
+
+          await wait(changeInterval);
+
           expect(errorSpy).not.toHaveBeenCalled();
           renameSync(newOneDirPath, oneDirPath);
-          await wait(200);
+          console.log('changed oneDir back', Date.now());
+
+          await wait(changeInterval);
+
           expect(errorSpy).not.toHaveBeenCalled();
 
           // change routes dir path and change back
-          renameSync(routesDirPath, newRoutesDirPath);
-          await wait(200);
+          /* renameSync(routesDirPath, newRoutesDirPath);
+          console.log('changed routesDir')
+
+          await wait(changeInterval);
+
           expect(errorSpy).not.toHaveBeenCalled();
           renameSync(newRoutesDirPath, routesDirPath);
-          await wait(200);
-          expect(errorSpy).not.toHaveBeenCalled();
+          console.log('changed routesDir back')
+
+          await wait(changeInterval);
+          expect(errorSpy).not.toHaveBeenCalled(); */
         };
 
-        const times = 2;
+        const times = 50;
 
         for (let i = 0; i < times; i++) {
           await loopFn(i + 1);
@@ -184,7 +207,7 @@ describe('webpack watch wait file builder', () => {
     });
   });
 
-  describe.skip('changing files should not work without WebpackWatchWaitForFileBuilderPlugin', () => {
+  describe('changing files should not work without WebpackWatchWaitForFileBuilderPlugin', () => {
     test(`webpack watching should not wait for fileBuilder's buildEnd and should throw error when changing files`, async () => {
       try {
         ctx = await launchFixture('webpack-watch-wait-file-builder', {

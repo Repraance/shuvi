@@ -324,6 +324,7 @@ class WebpackBundler implements Bunlder {
         !messages.errors?.length && !messages.warnings?.length;
       if (isSuccessful) {
         _log('Compiled successfully!');
+        console.log('successfully when done' + compiler.name, Date.now());
         await this._cliContext.pluginRunner.afterBundlerTargetDone({
           first: isFirstSuccessfulCompile,
           name: compiler.name!,
@@ -339,6 +340,7 @@ class WebpackBundler implements Bunlder {
         // Only keep the first error. Others are often indicative
         // of the same problem, but confuse the reader with noise.
         messages.errors = messages.errors.slice(0, 1);
+        console.error('Failed when done' + compiler.name, Date.now());
         _error('Failed to compile.\n');
         _error(messages.errors.join('\n\n'));
       }
