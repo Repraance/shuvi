@@ -1,4 +1,21 @@
-import { BuildInfo, DependencyInfo, FileId } from './types';
+import invariant from '@shuvi/utils/lib/invariant';
+import {
+  BuildInfo,
+  DependencyInfo,
+  FileId,
+  FileInternalInstance,
+  FileInfo
+} from './types';
+invariant;
+
+export const getFileInstanceById = (
+  id: string,
+  filesMap: Map<FileId, FileInternalInstance<any, any>>
+): FileInternalInstance => {
+  const file = filesMap.get(id);
+  invariant(file);
+  return file;
+};
 
 export const getDependencyInfoById = (
   id: string,
@@ -15,10 +32,10 @@ export const getDependencyInfoById = (
 
 export const appendChangedFiles = (
   buildInfo: BuildInfo,
-  changedFiles: ReadonlySet<FileId>
+  changedFiles: ReadonlyMap<FileId, FileInfo>
 ) => {
   const { collectedChangedFiles } = buildInfo;
-  changedFiles.forEach(file => {
-    collectedChangedFiles.add(file);
-  });
+  for (const [file, info] of changedFiles) {
+    collectedChangedFiles.set(file, info);
+  }
 };

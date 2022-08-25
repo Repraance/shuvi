@@ -38,6 +38,11 @@ export type DependencyInfo = {
   dependents: Set<FileId>;
 };
 
+export type FileInfo = {
+  /** timestamp that the file changes */
+  timestamp: number;
+};
+
 /**
  * Infos for a buildOnce
  */
@@ -61,7 +66,7 @@ export type BuildInfo = {
   /**
    * changed files that includes all the changed files of all the fronts.
    */
-  collectedChangedFiles: Set<FileId>;
+  collectedChangedFiles: Map<FileId, FileInfo>;
 };
 
 export type FileStatus = {
@@ -69,6 +74,7 @@ export type FileStatus = {
   updated: boolean;
   /** whether this file has changed after build */
   changed: boolean;
+  changedTime?: number;
 };
 
 export type BuildRunningInfo = {

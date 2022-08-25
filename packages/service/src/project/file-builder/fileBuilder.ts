@@ -15,7 +15,8 @@ import type {
   BuildInfo,
   DependencyInfo,
   FileStatus,
-  BuildRunningInfo
+  BuildRunningInfo,
+  FileInfo
 } from './types';
 import { appendChangedFiles } from './helpers';
 
@@ -23,13 +24,13 @@ type OnBuildStartEvent = {};
 
 type OnSingleBuildEndEvent = {
   finished: boolean;
-  changedFiles: ReadonlySet<string>;
-  timestamp: number;
+  changedFiles: ReadonlyMap<string, FileInfo>;
+  timestamp?: number;
 };
 
 type OnBuildEndEvent = {
-  changedFiles: ReadonlySet<string>;
-  timestamp: number;
+  changedFiles: ReadonlyMap<string, FileInfo>;
+  timestamp?: number;
 };
 
 type OnBuildStartHandler = (event: OnBuildStartEvent) => void;
@@ -48,10 +49,8 @@ export interface FileBuilder<C extends {}> {
   onBuildEnd: (eventHandler: OnBuildEndHandler) => EventCanceler;
   onSingleBuildEnd: (eventHandler: OnSingleBuildEndHandler) => EventCanceler;
   onInvalid: (eventHandler: () => void) => EventCanceler;
-  findFilesByDependencies: (
-    changedFiles: Set<string>,
-    removedFiles?: Set<string>
-  ) => Set<FileId>;
+  /** check if the file is the dependency of the fileBuilder */
+  isDependency: (filePath: string) => boolean;
 }
 
 const createInstance = (
@@ -90,30 +89,28 @@ export const getFileBuilder = <C extends {} = {}>(
     fileOptions.push(...newFileOption.map(option => ({ ...option })));
   };
 
-  const getFileInstanceById = (id: string): FileInternalInstance => {
-    const file = files.get(id);
-    invariant(file);
-    return file;
-  };
-
   const getFilePathById = (id: string) => files.get(id)?.fullPath;
 
-  const getFilePathsByIds = (ids: Set<string>) => {
-    const paths = new Set<string>();
-    ids.forEach(id => {
+  const getFileInfoMapWithPathAsKey = (
+    files: ReadonlyMap<FileId, FileInfo>
+  ) => {
+    const newMap = new Map<string, FileInfo>();
+    for (const [id, info] of files) {
       const filePath = getFilePathById(id);
       if (filePath) {
-        paths.add(filePath);
+        newMap.set(filePath, info);
       }
-    });
-    return paths;
+    }
+    return newMap;
   };
 
   const getFileIdByFileDependencyPath = (
     filePath: string
   ): FileId | undefined => {
     let currentFilePath = filePath;
+    console.log('=======watchingFilesMap', watchingFilesMap);
     while (currentFilePath !== '/' && currentFilePath !== '.') {
+      console.log('====currentFilePath', currentFilePath);
       if (watchingFilesMap.has(currentFilePath)) {
         return watchingFilesMap.get(currentFilePath);
       }
@@ -150,22 +147,20 @@ export const getFileBuilder = <C extends {} = {}>(
             dependencies.map(async dependencyFile => {
               if (typeof dependencyFile === 'string') {
                 // only collect watching info when needWatch
-                if (needWatch) {
-                  const directories: string[] = [];
-                  const files: string[] = [];
-                  const missing: string[] = [];
-                  if (await fs.pathExists(dependencyFile)) {
-                    if ((await fs.stat(dependencyFile)).isDirectory()) {
-                      directories.push(dependencyFile);
-                    } else {
-                      files.push(dependencyFile);
-                    }
-                  } else if (dependencyFile) {
-                    missing.push(dependencyFile);
+                const directories: string[] = [];
+                const files: string[] = [];
+                const missing: string[] = [];
+                if (await fs.pathExists(dependencyFile)) {
+                  if ((await fs.stat(dependencyFile)).isDirectory()) {
+                    directories.push(dependencyFile);
+                  } else {
+                    files.push(dependencyFile);
                   }
-                  watchMap.set(id, { directories, files, missing });
-                  watchingFilesMap.set(dependencyFile, id);
+                } else if (dependencyFile) {
+                  missing.push(dependencyFile);
                 }
+                watchMap.set(id, { directories, files, missing });
+                watchingFilesMap.set(dependencyFile, id);
               } else {
                 const dependencyId = dependencyFile.id;
                 const currentDependencies = currentInfo.dependencies;
@@ -269,6 +264,9 @@ export const getFileBuilder = <C extends {} = {}>(
     invariant(currentStatus);
     currentStatus.updated = true;
     currentStatus.changed = !shouldSkip;
+    if (!shouldSkip) {
+      currentStatus.changedTime = Date.now();
+    }
     buildRunningInfo.pendingFiles.delete(id);
     if (buildRunningInfo.pendingFiles.size === 0) {
       defer.resolve();
@@ -337,7 +335,7 @@ export const getFileBuilder = <C extends {} = {}>(
     files.forEach(file => {
       filesStatusMap.set(file, { updated: false, changed: false });
     });
-    const collectedChangedFiles = new Set<FileId>();
+    const collectedChangedFiles = new Map<FileId, FileInfo>();
     const buildInfo: BuildInfo = {
       id: uuid(),
       fronts: new Set<string>(),
@@ -408,11 +406,13 @@ export const getFileBuilder = <C extends {} = {}>(
     await defer.promise;
 
     // collecting changed files
-    const changedFiles = new Set<FileId>();
+    const changedFiles = new Map<FileId, FileInfo>();
     for (const [file, fileStatus] of pendingBuildRunningInfo.filesStatusMap) {
-      if (fileStatus.changed) {
-        changedFiles.add(file);
-        collectedChangedFiles.add(file);
+      const { changed, changedTime } = fileStatus;
+      if (changed) {
+        invariant(changedTime);
+        changedFiles.set(file, { timestamp: changedTime });
+        collectedChangedFiles.set(file, { timestamp: changedTime });
       }
     }
 
@@ -422,7 +422,7 @@ export const getFileBuilder = <C extends {} = {}>(
     Array.from(onSingleBuildEndHandlers).forEach(handler => {
       handler({
         finished,
-        changedFiles: getFilePathsByIds(changedFiles),
+        changedFiles: getFileInfoMapWithPathAsKey(changedFiles),
         timestamp
       });
     });
@@ -430,7 +430,7 @@ export const getFileBuilder = <C extends {} = {}>(
     if (finished) {
       Array.from(onBuildEndHandlers).forEach(handler => {
         handler({
-          changedFiles: getFilePathsByIds(collectedChangedFiles),
+          changedFiles: getFileInfoMapWithPathAsKey(collectedChangedFiles),
           timestamp
         });
       });
@@ -543,27 +543,8 @@ export const getFileBuilder = <C extends {} = {}>(
     };
   };
 
-  const findFilesByDependencies = (
-    changedFiles: Set<string>,
-    removedFiles?: Set<string>
-  ) => {
-    const targets = new Set<FileId>();
-    changedFiles.forEach(file => {
-      const target = getFileIdByFileDependencyPath(file);
-      if (target) {
-        targets.add(target);
-      }
-    });
-    if (removedFiles) {
-      removedFiles.forEach(file => {
-        const target = getFileIdByFileDependencyPath(file);
-        if (target) {
-          targets.add(target);
-        }
-      });
-    }
-    return targets;
-  };
+  const isDependency = (filePath: string) =>
+    Boolean(getFileIdByFileDependencyPath(filePath));
 
   return {
     addFile,
@@ -575,6 +556,6 @@ export const getFileBuilder = <C extends {} = {}>(
     onBuildEnd,
     onSingleBuildEnd,
     onInvalid,
-    findFilesByDependencies
+    isDependency
   };
 };

@@ -160,8 +160,8 @@ class ProjectBuilder {
     return this._fileBuilder.onInvalid;
   }
 
-  get findFilesByDependencies() {
-    return this._fileBuilder.findFilesByDependencies;
+  get isDependency() {
+    return this._fileBuilder.isDependency;
   }
 }
 

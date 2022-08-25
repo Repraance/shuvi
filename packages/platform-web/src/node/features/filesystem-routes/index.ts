@@ -64,7 +64,9 @@ const plugin = createPlugin({
       },
       dependencies: [paths.routesDir]
     });
-
+    function wait(timeout: number) {
+      return new Promise(resolve => setTimeout(resolve, timeout));
+    }
     const pageRoutesFile = defineFile({
       name: 'routes.js',
       content: async () => {
@@ -94,6 +96,7 @@ const plugin = createPlugin({
           paths.routesDir
         );
         setRoutes(normalizedRoutes);
+        await wait(1000);
         return generatePageRoutesContent(normalizedRoutes);
       },
       dependencies: [rawRoutes]
