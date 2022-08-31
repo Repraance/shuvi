@@ -55,7 +55,7 @@ export default class WebpackWatchWaitForFileBuilderPlugin implements Plugin {
      *
      */
     const canResume = (changedFiles: ReadonlyMap<string, FileInfo>) => {
-      console.log('canResume check');
+      //console.log('canResume check');
       const fileInfoEntries =
         compiler.watching.watcher?.getInfo?.().fileTimeInfoEntries;
       if (!fileInfoEntries) return false;
@@ -68,7 +68,7 @@ export default class WebpackWatchWaitForFileBuilderPlugin implements Plugin {
         }
         // webpack watcher's safeTime should >= timestamp
         if (safeTime < timestamp) {
-          console.log('can Resume failed', file, fileInfo);
+          //console.log('can Resume failed', file, fileInfo, timestamp);
           return false;
         }
       }
@@ -82,7 +82,7 @@ export default class WebpackWatchWaitForFileBuilderPlugin implements Plugin {
       mergeMaps(collectedChangedFiles, changedFiles);
       console.log(
         'onBuildEnd collectedChangedFiles.size',
-        collectedChangedFiles.size
+        collectedChangedFiles
       );
       // fileBuilder's files have changed, wait webpack watcher until it also detect these files have changed
       if (collectedChangedFiles.size) {
@@ -105,6 +105,7 @@ export default class WebpackWatchWaitForFileBuilderPlugin implements Plugin {
           compiler.watching.resume();
           clearInterval(checkResumeIntervalTimer);
           checkResumeIntervalTimer = undefined;
+          console.log('fallback timer triggered');
         }, fallbackTimeout);
       } else {
         // resume directly when no changed files

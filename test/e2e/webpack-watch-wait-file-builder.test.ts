@@ -71,13 +71,16 @@ describe('webpack watch wait file builder', () => {
         const loopFn = async (time: number) => {
           console.log('------------ current time ------------', time);
           // change sample file path and change back
-          renameSync(sampleFilePath, newSampleFilePath);
+          /* renameSync(sampleFilePath, newSampleFilePath);
+          console.log('-----------changed sampleFilePath--------------', time)
           await check(
             () => page.$text('#__APP'),
             t => /Index Page not exist/.test(t)
           );
 
           renameSync(newSampleFilePath, sampleFilePath);
+          console.log('-----------changed sampleFilePath back--------------', time)
+
           await check(
             () => page.$text('#__APP'),
             t => /Index Page sample1/.test(t)
@@ -85,12 +88,16 @@ describe('webpack watch wait file builder', () => {
 
           // change one page file path and change back
           renameSync(onePageFilePath, newOnePageFilePath);
+          console.log('-----------changed onePageFilePath--------------', time)
+
           await check(
             () => page.$text('#__APP'),
             t => /This page could not be found/.test(t)
           );
 
           renameSync(newOnePageFilePath, onePageFilePath);
+          console.log('-----------changed onePageFilePath back--------------', time)
+
           await check(
             () => page.$text('#__APP'),
             t => /Index Page sample1/.test(t)
@@ -98,25 +105,36 @@ describe('webpack watch wait file builder', () => {
 
           // change one dir path and change back
           renameSync(oneDirPath, newOneDirPath);
+          console.log('-----------changed oneDirPath--------------', time)
+
           await check(
             () => page.$text('#__APP'),
             t => /This page could not be found/.test(t)
           );
 
           renameSync(newOneDirPath, oneDirPath);
+          console.log('-----------changed oneDirPath back--------------', time)
+
           await check(
             () => page.$text('#__APP'),
             t => /Index Page sample1/.test(t)
           );
-
+          */
           // change routes dir path and change back
           renameSync(routesDirPath, newRoutesDirPath);
+          console.log('-----------changed routesDirPath--------------', time);
+
           await check(
             () => page.$text('#__APP'),
             t => /This page could not be found/.test(t)
           );
 
           renameSync(newRoutesDirPath, routesDirPath);
+          console.log(
+            '-----------changed routesDirPath back--------------',
+            time
+          );
+
           await check(
             () => page.$text('#__APP'),
             t => /Index Page sample1/.test(t)
