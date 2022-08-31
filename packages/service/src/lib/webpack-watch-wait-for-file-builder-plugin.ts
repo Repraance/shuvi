@@ -42,6 +42,7 @@ export default class WebpackWatchWaitForFileBuilderPlugin implements Plugin {
        * then stop the checkResumeIntervalTimer and the fallback timer.
        */
       if (checkResumeIntervalTimer) {
+        console.log('onInvalid clearInterval checkResumeIntervalTimer');
         clearInterval(checkResumeIntervalTimer);
         clearTimeout(fallbackTimer);
         checkResumeIntervalTimer = undefined;
@@ -54,6 +55,7 @@ export default class WebpackWatchWaitForFileBuilderPlugin implements Plugin {
      *
      */
     const canResume = (changedFiles: ReadonlyMap<string, FileInfo>) => {
+      console.log('canResume check');
       const fileInfoEntries =
         compiler.watching.watcher?.getInfo?.().fileTimeInfoEntries;
       if (!fileInfoEntries) return false;
@@ -61,18 +63,27 @@ export default class WebpackWatchWaitForFileBuilderPlugin implements Plugin {
       for (const [file, { timestamp }] of changedFiles) {
         const fileInfo = fileInfoEntries.get(file);
         const safeTime: number = (fileInfo as any)?.safeTime || 0;
-
+        if (!fileInfo) {
+          console.log('============== not found');
+        }
         // webpack watcher's safeTime should >= timestamp
         if (safeTime < timestamp) {
+          console.log('can Resume failed', file, fileInfo);
           return false;
         }
       }
+      console.log('canResume check OK');
+
       return true;
     };
 
     onBuildEnd(({ changedFiles }) => {
+      console.log('onBuildEnd', changedFiles, compiler.watching.suspended);
       mergeMaps(collectedChangedFiles, changedFiles);
-
+      console.log(
+        'onBuildEnd collectedChangedFiles.size',
+        collectedChangedFiles.size
+      );
       // fileBuilder's files have changed, wait webpack watcher until it also detect these files have changed
       if (collectedChangedFiles.size) {
         if (!checkResumeIntervalTimer) {
@@ -101,9 +112,14 @@ export default class WebpackWatchWaitForFileBuilderPlugin implements Plugin {
       }
     });
 
+    compiler.hooks.watchRun.tap('sdssds', () => {
+      console.log('=======watchRun', compiler.name);
+    });
+
     compiler.hooks.invalid.tap(
       'WebpackWatchWaitForFileBuilderPlugin-invalid',
       file => {
+        console.log('=====invalid', compiler.name);
         // collect changed files and removed files and check if they are the dependencies of the fileBuilder
         // if yes, invoke `compiler.watching.suspend()`
         const removedFiles: Set<string> | undefined = (compiler.watching as any)
@@ -116,6 +132,7 @@ export default class WebpackWatchWaitForFileBuilderPlugin implements Plugin {
         for (const currentFile of files) {
           if (isDependency(currentFile)) {
             compiler.watching.suspend();
+            console.log('=== suspended by invalid', compiler.name);
             return;
           }
         }

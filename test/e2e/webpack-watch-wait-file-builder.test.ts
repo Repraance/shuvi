@@ -123,7 +123,7 @@ describe('webpack watch wait file builder', () => {
           );
         };
 
-        const times = 5;
+        const times = 500;
 
         for (let i = 0; i < times; i++) {
           await loopFn(i + 1);

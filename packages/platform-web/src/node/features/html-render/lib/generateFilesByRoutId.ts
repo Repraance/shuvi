@@ -9,7 +9,10 @@ export default function generateFilesByRoutId(
   const loadable = assetMap.loadble;
   routes.forEach(({ id, __componentRawRequest__ }) => {
     if (__componentRawRequest__) {
-      filesByRoutId[id] = loadable[__componentRawRequest__].files;
+      const files = loadable[__componentRawRequest__]?.files;
+      if (files) {
+        filesByRoutId[id] = files;
+      }
     }
   });
 
