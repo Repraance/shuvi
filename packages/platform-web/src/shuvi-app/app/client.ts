@@ -124,9 +124,8 @@ export const createApp: CreateAppClient = ({
         return;
       }
 
-      if (isResponse(error) && error.status >= 400 && error.status < 600) {
+      if (isResponse(error)) {
         app.setError({
-          code: error.status,
           message: error.data
         });
         next();

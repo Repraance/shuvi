@@ -31,10 +31,7 @@ class ErrorBoundary extends React.PureComponent<
   render() {
     return this.state.error ? (
       // The component has to be unmounted or else it would continue to error
-      <ErrorPage
-        code={SHUVI_ERROR.APP_ERROR.code}
-        message={SHUVI_ERROR.APP_ERROR.message}
-      />
+      <ErrorPage message={this.state.error} />
     ) : (
       (this.props.children as unknown as React.ReactNode)
     );
