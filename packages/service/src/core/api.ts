@@ -243,10 +243,10 @@ class Api {
               }
             ]);
         }
-
         return config;
       }
     });
+
     usePlugin(addIncludeToSwcLoader, webpackWaitPlugin);
 
     // 2. init user plugins

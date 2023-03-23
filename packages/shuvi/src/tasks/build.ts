@@ -77,6 +77,11 @@ export async function build(options: IBuildOptions) {
   const bundler = await api.getBundler();
   // transpile the application
   await bundle(bundler);
+  if (options.config?.analyze) {
+    logger.info(
+      `Webpack bundle analysis report and statistics are generated. You can open the html with browser to view it.`
+    );
+  }
   await pluginContext.pluginRunner.afterBuild();
   await analysis({ context: api.pluginContext, telemetry: api.telemetry });
   await api.telemetry.flush();

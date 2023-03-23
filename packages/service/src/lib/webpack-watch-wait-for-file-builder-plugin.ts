@@ -5,7 +5,7 @@ import { FileInfo } from '../project/index';
 const checkResumeInterval = 10;
 const fallbackTimeout = 1000 * 5;
 
-type Options = {
+export type Options = {
   onBuildStart: ProjectBuilder['onBuildStart'];
   onBuildEnd: ProjectBuilder['onBuildEnd'];
   onInvalid: ProjectBuilder['onInvalid'];
