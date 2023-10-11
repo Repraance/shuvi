@@ -5,6 +5,7 @@ import {
   Location,
   ResolvedPath,
   PathRecord,
+  Path,
   Action
 } from '../types';
 import {
@@ -39,7 +40,7 @@ export const ACTION_REPLACE: Action = 'REPLACE';
 export interface TransitionOptions {
   state?: State;
   action?: Action;
-  redirectedFrom?: PathRecord;
+  redirectedFrom?: Path;
 
   /**
    * skipGuards means this route transition will be straightforwardly executed without any before guard
@@ -55,7 +56,7 @@ export interface TransitionOptions {
 
 export interface PushOptions {
   state?: object | null | undefined;
-  redirectedFrom?: PathRecord;
+  redirectedFrom?: Path;
   skipGuards?: boolean;
 }
 
@@ -66,7 +67,9 @@ export default abstract class BaseHistory {
     to: PathRecord,
     onComplete: Function,
     onAbort?: Function,
-    skipGuards?: boolean
+    skipGuards?: boolean,
+    isReplace?: boolean,
+    redirectedFrom?: Path
   ) => void = () => void 0;
 
   protected _index: number = 0;
@@ -128,7 +131,19 @@ export default abstract class BaseHistory {
     }: TransitionOptions
   ) {
     const { path } = this.resolve(to, this.location.pathname);
+
+    console.log('-----------------transitionTo', to);
+    console.log(
+      '-----------------transitionTo this.location.pathname',
+      this.location.pathname
+    );
+    console.log('-----------------transitionTo path', path);
     const nextLocation = createLocation(path, { state, redirectedFrom });
+    // console.log('----------transitionTo', to)
+    /* if (to === '/context/redirect?target=combo%2Fc') {
+      console.log('----------transitionTo', to, state)
+      console.log('----------transitionTo path', nextLocation)
+    } */
 
     // check transition
     if (this._blockers.length) {
@@ -165,7 +180,9 @@ export default abstract class BaseHistory {
         this._updateState(action);
       },
       onAbort,
-      skipGuards
+      skipGuards,
+      action === ACTION_REPLACE,
+      redirectedFrom
     );
   }
 

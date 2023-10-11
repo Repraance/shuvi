@@ -79,6 +79,7 @@ export default class MemoryHistory extends BaseHistory {
     to: PathRecord,
     { state, redirectedFrom, skipGuards }: PushOptions = {}
   ) {
+    console.log('----------replace', to, state);
     return this.transitionTo(to, {
       state,
       action: ACTION_REPLACE,

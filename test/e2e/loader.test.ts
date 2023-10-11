@@ -7,7 +7,7 @@ describe('loader', () => {
   let page: Page;
   describe('ssr = true', () => {
     beforeAll(async () => {
-      ctx = await devFixture('loader');
+      ctx = await devFixture('loader', { ssr: true });
     });
     afterAll(async () => {
       await ctx.close();
@@ -242,6 +242,11 @@ describe('loader', () => {
         });
         await page.waitForSelector('#page-content');
         expect(await page.$text('#page-content')).toBe('C');
+
+        await page.goBack();
+        expect(page.url()).toBe(ctx.url('/'));
+        await page.waitForSelector('#index-content');
+        expect(await page.$text('#index-content')).toBe('index page');
       });
 
       it('should support params and query url in client', async () => {
@@ -340,7 +345,7 @@ describe('loader', () => {
       expect(leafLoaderContext.params).toStrictEqual(rootLoaderContext.params);
     });
 
-    test('should be called after navigations', async () => {
+    test('should be called after navigation', async () => {
       page = await ctx.browser.page(ctx.url('/one'));
       await page.waitForTimeout(1000);
       expect(await page.$text('[data-test-id="name"]')).toBe('Page One');
@@ -355,6 +360,95 @@ describe('loader', () => {
       expect(await page.$text('body')).toMatch(/123/);
       // this may fail, but I don't know why
       expect(await page.$text('[data-test-id="test"]')).toBe('123');
+    });
+
+    describe('redirect', () => {
+      const THIRD_PARTY_SITE =
+        'https://en.wikipedia.org/wiki/React_(JavaScript_library)#Components';
+
+      const FULL_URL = '/context/redirect/combo/params?query=1';
+
+      it('csr should support redirect chain', async () => {
+        page = await ctx.browser.page(ctx.url('/'));
+        await page.goto(
+          ctx.url('/context/redirect', { target: '/context/redirect/combo/a' })
+        );
+
+        await page.waitForSelector('#page-content');
+        expect(await page.$text('#page-content')).toBe('C');
+
+        await page.goBack();
+        expect(page.url()).toBe(ctx.url('/'));
+        await page.waitForSelector('#index-content');
+        expect(await page.$text('#index-content')).toBe('index page');
+      });
+
+      it('csr should support params and query', async () => {
+        page = await ctx.browser.page(ctx.url('/'));
+        await page.goto(ctx.url('/context/redirect', { target: FULL_URL }));
+        await page.waitForSelector('#url-data');
+        expect(await page.$text('#url-data')).toBe(
+          '{"query":{"query":"1"},"params":{"d":"params"},"pathname":"/context/redirect/combo/params"}'
+        );
+      });
+
+      it('csr should support relative url', async () => {
+        page = await ctx.browser.page(ctx.url('/'));
+        await page.goto(ctx.url('/context/redirect', { target: 'combo/c' }));
+        expect(page.url()).toBe('');
+        await page.waitForSelector('#page-content');
+        expect(await page.$text('#page-content')).toBe('C');
+      });
+
+      it('csr should support third-party site', async () => {
+        page = await ctx.browser.page(ctx.url('/'));
+        await page.goto(
+          ctx.url('/context/redirect', { target: THIRD_PARTY_SITE })
+        );
+        expect(page.url()).toBe(THIRD_PARTY_SITE);
+        expect(await page.$text('#firstHeading')).toContain('React');
+      });
+
+      it('csr should support redirect chain in route navigation', async () => {
+        page = await ctx.browser.page(ctx.url('/'));
+        await page.shuvi.navigate('/context/redirect', {
+          target: '/context/redirect/combo/a'
+        });
+        await page.waitForSelector('#page-content');
+        expect(await page.$text('#page-content')).toBe('C');
+
+        await page.goBack();
+        expect(page.url()).toBe(ctx.url('/'));
+        await page.waitForSelector('#index-content');
+        expect(await page.$text('#index-content')).toBe('index page');
+      });
+
+      it('csr should support params and query url in client', async () => {
+        page = await ctx.browser.page(ctx.url('/'));
+        await page.shuvi.navigate('/context/redirect', { target: FULL_URL });
+        await page.waitForSelector('#url-data');
+        expect(await page.$text('#url-data')).toBe(
+          '{"query":{"query":"1"},"params":{"d":"params"},"pathname":"/context/redirect/combo/params"}'
+        );
+      });
+
+      it('csr should support relative url in client', async () => {
+        page = await ctx.browser.page(ctx.url('/'));
+        await page.shuvi.navigate('/context/redirect', {
+          target: 'context/redirect/combo/c'
+        });
+        await page.waitForSelector('#page-content');
+        expect(await page.$text('#page-content')).toBe('C');
+      });
+
+      it('csr should support third-party site in client', async () => {
+        page = await ctx.browser.page(ctx.url('/'));
+        await page.shuvi.navigate('/context/redirect', {
+          target: THIRD_PARTY_SITE
+        });
+        await page.waitForSelector('#firstHeading');
+        expect(await page.$text('#firstHeading')).toContain('React');
+      });
     });
   });
 

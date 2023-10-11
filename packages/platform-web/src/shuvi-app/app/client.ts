@@ -139,10 +139,8 @@ export const createApp: CreateAppClient = ({
         if (isThirdSite(location)) {
           window.location.replace(location);
         } else {
-          next({
-            path: location,
-            replace: true
-          });
+          console.log('----------redirect location', location);
+          next(location);
         }
         runLoadersTrace.setAttribute(
           SHUVI_CLIENT_RUN_LOADERS.attrs.errorType.name,

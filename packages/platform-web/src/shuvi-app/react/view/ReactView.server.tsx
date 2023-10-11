@@ -28,7 +28,6 @@ export class ReactServerView implements IReactServerView {
     if (!matches.length) {
       setAppError(SHUVI_ERROR.PAGE_NOT_FOUND);
     }
-
     if (redirected) {
       // handel loader redirect
       if (
@@ -40,9 +39,7 @@ export class ReactServerView implements IReactServerView {
           status: number;
         };
         return redirect(
-          isThirdSite(location)
-            ? location
-            : router.resolve(location, pathname).href,
+          isThirdSite(location) ? location : router.resolve(location).href,
           status
         );
       }

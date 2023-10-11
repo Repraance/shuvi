@@ -8,9 +8,27 @@ const Index = () => {
   return (
     <div id="loader-index">
       <p>{data.hello}</p>
+      <div id="index-content">index page</div>
       <div>
-        <Link to={`/parent/foo/a`}>Go /foo/a</Link>
+        <Link to={`/parent/foo/a`} replace>
+          Go /foo/a
+        </Link>
         <Link to={`/always-fail`}>Go /always-fail</Link>
+      </div>
+      <div>
+        <Link to={`/context/redirect/combo/b`}>Go /b</Link>
+      </div>
+      <div>
+        <Link
+          to={`/context/redirect?target=%2Fcontext%2Fredirect%2Fcombo%2Fparams%3Fquery%3D1`}
+        >
+          Go /context/redirect/combo
+        </Link>
+      </div>
+      <div>
+        <Link to={`/context/redirect?target=combo%2Fc`}>
+          Go /context/redirect/combo/c
+        </Link>
       </div>
     </div>
   );

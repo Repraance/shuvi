@@ -67,6 +67,11 @@ export const createApp: CreateAppServer = options => {
         if (isRedirect(error)) {
           const location = error.headers.get('Location')!;
           const status = error.status;
+          console.log('----------redirect loader to', to);
+          console.log('----------redirect loader location', location);
+          console.log('----------redirect loader path', pathToString(to));
+          // server side redirect is different from regular route redirect because it has the extra data statusCode
+          // So it won't change route target, but just store the redirect location in state
           next({
             path: pathToString(to),
             replace: true,

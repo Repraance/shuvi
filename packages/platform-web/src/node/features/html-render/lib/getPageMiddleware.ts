@@ -34,6 +34,7 @@ function createPageHandler(serverPluginContext: IServerPluginContext) {
   let pendingSendHtml: Promise<ISendHtml>;
 
   return async function (req: ShuviRequest, res: ServerResponse) {
+    console.log('----------page handler-----------', req.url);
     const { serverRequestTrace } = req._traces;
     const result = await serverRequestTrace
       .traceChild(SHUVI_SERVER_RENDER_TO_HTML.name, {
