@@ -8,7 +8,7 @@ export class SsrRenderer extends BaseRenderer {
   async renderDocument({ app, req }: IRenderViewOptions) {
     const { store, router, context } = app;
 
-    const serverPluginContext = this._serverPluginContext;
+    const { config: { router: { basename } }, serverPluginRunner: { getPageData } } = this._serverPluginContext;
     const { view } = resources.server;
     if (!router) {
       throw new Error('router is null');
@@ -25,7 +25,7 @@ export class SsrRenderer extends BaseRenderer {
 
     const mainAssetsTags = this._getMainAssetTags(req);
     const pageDataList =
-      await serverPluginContext.serverPluginRunner.getPageData(context);
+      await getPageData(context);
     const pageData = pageDataList.reduce((acc, data) => {
       Object.assign(acc, data);
       return acc;
@@ -34,6 +34,7 @@ export class SsrRenderer extends BaseRenderer {
       ...result.appData,
       ssr: true,
       appState: store.getState(),
+      basename,
       pageData
     };
     appData.runtimeConfig = getPublicRuntimeConfig() || {};

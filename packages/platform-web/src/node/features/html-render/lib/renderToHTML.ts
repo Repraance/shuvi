@@ -15,6 +15,7 @@ export async function renderToHTML({
   const renderer = new Renderer({ serverPluginContext });
   const { serverCreateAppTrace } = req._traces;
   const { application } = resources.server;
+  const { ssr, router: { basename } } = serverPluginContext.config;
   const app = serverCreateAppTrace
     .traceChild(SERVER_CREATE_APP.events.SHUVI_SERVER_CREATE_APP.name, {
       [SERVER_CREATE_APP.events.SHUVI_SERVER_CREATE_APP.attrs.requestId.name]:
@@ -23,7 +24,8 @@ export async function renderToHTML({
     .traceFn(() =>
       application.createApp({
         req,
-        ssr: serverPluginContext.config.ssr
+        ssr,
+        basename
       })
     );
 
@@ -37,7 +39,7 @@ export async function renderToHTML({
     result = await renderer.renderView({
       req,
       app: app.getPublicAPI(),
-      ssr: serverPluginContext.config.ssr
+      ssr,
     });
   } finally {
     await app.dispose();

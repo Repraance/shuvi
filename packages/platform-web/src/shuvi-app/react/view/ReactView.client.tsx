@@ -54,6 +54,7 @@ export class ReactClientView implements IReactClientView {
 
       await Promise.all([Loadable.preloadReady(dynamicIds), router.ready]);
     } else {
+      router.current
       await router.ready;
       const { matches } = router.current;
 

@@ -137,6 +137,8 @@ class Api {
       rootDir: this._cwd,
       filepath: this._configFile
     });
+
+    console.log('-----------configFromFile', configFromFile)
     this._config = deepmerge(
       getDefaultConfig(),
       this._normalizePlatformConfig

@@ -2,6 +2,7 @@ import {
   createAsyncParallelHook,
   createAsyncSeriesHook,
   createAsyncSeriesWaterfallHook,
+  createSyncBailHook,
   createHookManager,
   isPluginInstance,
   IPluginInstance,
@@ -14,14 +15,19 @@ import { createPluginCreator } from '@shuvi/shared/plugins';
 import { IAppContext } from './applicationTypes';
 import { IRouter } from './routerTypes';
 
-export type AppComponent = unknown;
+export type AppComponent = any;
 export type AppContextCtx = {
+  router: IRouter;
+  request?: ShuviRequest;
+};
+export type AppConfigCtx = {
   router: IRouter;
   request?: ShuviRequest;
 };
 
 const init = createAsyncParallelHook<void>();
 const appContext = createAsyncSeriesHook<IAppContext, AppContextCtx>();
+const appConfig = createSyncBailHook<IAppContext, AppConfigCtx>();
 const appComponent = createAsyncSeriesWaterfallHook<
   AppComponent,
   IAppContext

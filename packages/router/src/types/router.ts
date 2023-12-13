@@ -75,6 +75,12 @@ export interface IPathMatch {
 
 export type IPartialRouteRecord<Element = any> = Partial<IRouteRecord<Element>>;
 
+export type Base = {
+  basename: string
+  basePath: string
+  baseParams: Record<string, string>
+}
+
 export interface IRoute<RouteRecord extends IRouteRecord = IRouteRecord>
   extends Path {
   params: IParams;
@@ -82,6 +88,7 @@ export interface IRoute<RouteRecord extends IRouteRecord = IRouteRecord>
   matches: IRouteMatch<RouteRecord>[];
   redirected?: boolean;
   key: string;
+  base: Base
   // todo?
   // fullpath: string?
   // href: string?

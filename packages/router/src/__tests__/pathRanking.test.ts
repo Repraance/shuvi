@@ -151,6 +151,13 @@ describe('Path ranking', () => {
     });
   });
 
+  it('optional params with nested path', () => {
+    checkPathOrder([
+      '/:p?/nested',
+      '/:p?/',
+    ]);
+  })
+
   // FIXME
   it.skip('puts catchall param after same prefix', () => {
     possibleOptions.forEach(options => {

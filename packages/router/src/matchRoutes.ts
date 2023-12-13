@@ -17,7 +17,8 @@ export interface IRouteBaseObject<Element = any>
 
 function matchRouteBranch<T extends IRouteBaseObject>(
   branch: IRouteBranch<T>,
-  pathname: string
+  pathname: string,
+  basename?: string
 ): IRouteMatch<T>[] | null {
   let routes = branch[1];
   let matchedPathname = '/';
@@ -30,9 +31,10 @@ function matchRouteBranch<T extends IRouteBaseObject>(
       matchedPathname === '/'
         ? pathname
         : pathname.slice(matchedPathname.length) || '/';
+    const pathWithBasename = joinPaths([basename || '', route.path]);
     let routeMatch = matchPathname(
       {
-        path: route.path,
+        path: matchedPathname === '/' ? pathWithBasename: route.path,
         caseSensitive: route.caseSensitive,
         end: i === routes.length - 1
       },
@@ -116,23 +118,19 @@ export function matchRoutes<T extends IRouteBaseObject>(
   }
 
   let pathname = location.pathname || '/';
-  if (basename) {
-    let base = basename.replace(/^\/*/, '/').replace(/\/+$/, '');
-    if (pathname.startsWith(base)) {
-      pathname = pathname === base ? '/' : pathname.slice(base.length);
-    } else {
-      // Pathname does not start with the basename, no match.
-      return null;
-    }
-  }
+  let branches = flattenRoutes(routes, [], '');
 
-  let branches = flattenRoutes(routes);
   branches = rankRouteBranches(branches);
 
   let matches: IRouteMatch<T>[] | null = null;
   for (let i = 0; matches == null && i < branches.length; ++i) {
     // TODO: Match on search, state too?
     matches = matchRouteBranch<T>(branches[i], pathname);
+  }
+  for (let i = 0; matches == null && i < branches.length; ++i) {
+    // TODO: Match on search, state too?
+    matches = matchRouteBranch<T>(branches[i], pathname, basename);
+    console.log('-------try matchRouteBranch result', matches)
   }
 
   return matches;

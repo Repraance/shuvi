@@ -118,6 +118,13 @@ export class ApplicationImpl<Config extends {} = {}> {
     });
   }
 
+  private async _initAppConfig() {
+    await this._pluginManager.runner.appContext(this._context, {
+      router: this._router,
+      request: this._request
+    });
+  }
+
   private async _initAppComponent() {
     this._appComponent = await this._pluginManager.runner.appComponent(
       this._appComponent,

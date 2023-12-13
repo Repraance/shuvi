@@ -5,6 +5,7 @@ import {
 
 export interface IRouterConfig {
   history: IRouterHistoryMode | 'auto';
+  basename?: string;
 }
 
 export interface PlatformWebCustomConfig {

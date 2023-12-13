@@ -13,7 +13,10 @@ function getDefaultPlatformConfig(): PlatformWebCustomConfig {
 }
 
 export function normalizePlatformConfig(rawConfig: ShuviConfig): ShuviConfig {
+  console.log('-----------rawConfig', rawConfig)
   const config = deepmerge(getDefaultPlatformConfig(), rawConfig);
+  console.log('-----------config', config)
+
   if (config.router.history === 'auto') {
     config.router.history = config.ssr ? 'browser' : 'hash';
   }

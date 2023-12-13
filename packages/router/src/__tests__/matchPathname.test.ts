@@ -127,6 +127,14 @@ describe('matchPathname', () => {
     });
   });
 
+  it('should work with optional params and nested path', () => {
+    expect(matchPathname({ path: '/:optional?/nested' }, '/nested')).toStrictEqual({
+      params: { optional: '' },
+      path: '/:optional?/nested',
+      pathname: '/nested'
+    });
+  });
+
   it('should not log warning when optional params is empty', () => {
     jest.spyOn(console, 'warn');
 

@@ -144,6 +144,8 @@ class Router<RouteRecord extends IRouteRecord> implements IRouter<RouteRecord> {
 
   match = (to: PathRecord): Array<IRouteMatch<RouteRecord>> => {
     const { _routes: routes, _basename: basename } = this;
+    // console.log('-----match called', basename)
+
     const matches = matchRoutes(routes, to, basename);
     return matches || [];
   };
